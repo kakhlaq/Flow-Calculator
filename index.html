@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flow Meter Calculator</title>
+    <title>Flow Calculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -97,7 +97,7 @@
     </style>
 </head>
 <body>
-    <h1>Flow Meter Calculator</h1>
+    <h1>Flow Calculator</h1>
     
     <div class="calculator">
         <form id="flow-calculator-form">
@@ -245,7 +245,7 @@
                 </div>
             </div>
             
-            <button type="submit">Calculate Flow Rate</button>
+            <button type="button" id="calculate-btn">Calculate Flow Rate</button>
         </form>
         
         <div id="error-message" class="error"></div>
@@ -409,10 +409,8 @@
             };
         }
 
-        // Form submission handler
-        document.getElementById('flow-calculator-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        // Calculation button click handler
+        document.getElementById('calculate-btn').addEventListener('click', function() {
             // Hide previous results/errors
             document.getElementById('results').style.display = 'none';
             document.getElementById('error-message').textContent = '';
@@ -478,8 +476,6 @@
                 showError("Calculation error: " + error.message);
                 console.error(error);
             }
-            
-            return false;
         });
     </script>
 </body>
