@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Meter Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .calculator {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        .section-title {
+            margin-top: 20px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            color: #2c3e50;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .col {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flow Meter Calculator</h1>
+    
+    <div class="calculator">
+        <form id="flow-calculator-form">
+            <div class="section-title">Flow Meter Parameters</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="meter-type">Flow Meter Type</label>
+                        <select id="meter-type">
+                            <option value="orifice">Orifice Plate</option>
+                            <option value="venturi">Venturi Tube</option>
+                            <option value="nozzle">Flow Nozzle</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="discharge-coeff">Discharge Coefficient (optional)</label>
+                        <input type="number" id="discharge-coeff" step="0.001" placeholder="Leave blank for automatic">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">Geometry</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="orifice-diameter">Orifice Diameter (m)</label>
+                        <input type="number" id="orifice-diameter" value="0.05" step="0.001" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="pipe-diameter">Pipe Diameter (m)</label>
+                        <input type="number" id="pipe-diameter" value="0.1" step="0.001" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">Operating Conditions</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dp">Differential Pressure</label>
+                        <div class="row">
+                            <div class="col" style="flex: 3;">
+                                <input type="number" id="dp" value="5000" step="1" required>
+                            </div>
+                            <div class="col" style="flex: 2;">
+                                <select id="dp-unit">
+                                    <option value="Pa">Pa</option>
+                                    <option value="kPa">kPa</option>
+                                    <option value="bar">bar</option>
+                                    <option value="psi">psi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="gas-pressure">Absolute Pressure</label>
+                        <div class="row">
+                            <div class="col" style="flex: 3;">
+                                <input type="number" id="gas-pressure" value="200000" step="1" required>
+                            </div>
+                            <div class="col" style="flex: 2;">
+                                <select id="pressure-unit">
+                                    <option value="Pa">Pa</option>
+                                    <option value="kPa">kPa</option>
+                                    <option value="bar">bar</option>
+                                    <option value="psi">psi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="gas-density">Gas Density (kg/m³)</label>
+                        <input type="number" id="gas-density" value="0.8" step="0.01" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="gas-temp">Gas Temperature</label>
+                        <div class="row">
+                            <div class="col" style="flex: 3;">
+                                <input type="number" id="gas-temp" value="293" step="0.1" required>
+                            </div>
+                            <div class="col" style="flex: 2;">
+                                <select id="temp-unit">
+                                    <option value="K">K</option>
+                                    <option value="C">°C</option>
+                                    <option value="F">°F</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">Advanced Options</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="viscosity">Dynamic Viscosity (Pa·s)</label>
+                        <input type="number" id="viscosity" value="1.8e-5" step="1e-7" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="isentropic-exp">Isentropic Exponent (γ)</label>
+                        <input type="number" id="isentropic-exp" value="1.4" step="0.01" placeholder="Default: 1.4">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">Standard Conditions</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="standard-density">Standard Density (kg/m³)</label>
+                        <input type="number" id="standard-density" value="1.225" step="0.001" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="standard-temp">Standard Temperature</label>
+                        <div class="row">
+                            <div class="col" style="flex: 3;">
+                                <input type="number" id="standard-temp" value="273.15" step="0.1" required>
+                            </div>
+                            <div class="col" style="flex: 2;">
+                                <select id="standard-temp-unit">
+                                    <option value="K">K</option>
+                                    <option value="C">°C</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit">Calculate Flow Rate</button>
+        </form>
+        
+        <div id="error-message" class="error"></div>
+        
+        <div id="results" class="results">
+            <h3>Results</h3>
+            <div id="result-values"></div>
+        </div>
+    </div>
+
+    <script>
+        // Pressure unit conversion factors (to Pa)
+        const pressureConversions = {
+            Pa: 1,
+            kPa: 1000,
+            bar: 100000,
+            psi: 6894.76
+        };
+
+        // Temperature conversion functions
+        function convertTemperature(value, fromUnit, toUnit) {
+            if (fromUnit === toUnit) return value;
+            
+            // Convert to Kelvin first
+            let kelvin;
+            switch(fromUnit) {
+                case 'K': kelvin = value; break;
+                case 'C': kelvin = value + 273.15; break;
+                case 'F': kelvin = (value - 32) * 5/9 + 273.15; break;
+                default: throw new Error(`Unknown temperature unit: ${fromUnit}`);
+            }
+            
+            // Convert from Kelvin to target unit
+            switch(toUnit) {
+                case 'K': return kelvin;
+                case 'C': return kelvin - 273.15;
+                case 'F': return (kelvin - 273.15) * 9/5 + 32;
+                default: throw new Error(`Unknown temperature unit: ${toUnit}`);
+            }
+        }
+
+        // Calculate discharge coefficient based on meter type
+        function calculateDischargeCoefficient(meterType, beta, reynolds = null) {
+            switch(meterType) {
+                case 'orifice':
+                    if (reynolds === null) return 0.61;
+                    // Reader-Harris/Gallagher equation (ISO 5167-2:2003)
+                    return (0.5961 + 0.0261 * Math.pow(beta, 2) - 0.216 * Math.pow(beta, 8) 
+                           + 0.000521 * Math.pow((1e6 * beta / reynolds), 0.7) 
+                           + (0.0188 + 0.0063 * Math.pow((19000 * beta / reynolds), 0.8)) 
+                           * Math.pow(beta, 3.5) * Math.pow((1e6 / reynolds), 0.3);
+                
+                case 'venturi':
+                    // ISO 5167-4:2003 for classical venturi
+                    return 0.985 - 0.196 * Math.pow(beta, 4.5);
+                
+                case 'nozzle':
+                    // ISO 5167-3:2003 for ISA 1932 nozzle
+                    if (reynolds === null) return 0.99;
+                    return 0.99 - 0.053 * beta - 0.036 * Math.pow(beta, 4) 
+                           + 0.09 * (1 - beta) * Math.pow((1.5 - Math.log10(reynolds/1e5)), 2);
+                
+                default:
+                    throw new Error(`Unsupported flow meter type: ${meterType}`);
+            }
+        }
+
+        // Calculate expansion factor
+        function calculateExpansionFactor(meterType, beta, pressureRatio, isentropicExponent) {
+            if (pressureRatio <= 0) return 1.0;
+            
+            switch(meterType) {
+                case 'orifice':
+                    // ISO 5167-2:2003 for orifice plates
+                    return 1 - (0.351 + 0.256 * Math.pow(beta, 4) + 0.93 * Math.pow(beta, 8)) 
+                           * (1 - Math.pow((1 - pressureRatio), (1 / isentropicExponent)));
+                
+                case 'venturi':
+                case 'nozzle':
+                    // ISO 5167-4:2003 for venturi and nozzle
+                    return Math.sqrt(
+                        Math.pow(pressureRatio, (2 / isentropicExponent)) 
+                        * (isentropicExponent / (isentropicExponent - 1)) 
+                        * (1 - Math.pow(beta, 4)) 
+                        / (1 - Math.pow(beta, 4) * Math.pow(pressureRatio, (2 / isentropicExponent))) 
+                        * (1 - Math.pow(pressureRatio, ((isentropicExponent - 1) / isentropicExponent)))
+                    );
+                
+                default:
+                    throw new Error(`Unsupported flow meter type: ${meterType}`);
+            }
+        }
+
+        // Main calculation function
+        function calculateFlowRate(params) {
+            // Convert all inputs to SI units
+            const dpPa = params.dp * pressureConversions[params.dpUnit];
+            const gasPressurePa = params.gasPressure * pressureConversions[params.pressureUnit];
+            const gasTempK = convertTemperature(params.gasTemp, params.tempUnit, 'K');
+            const standardTempK = convertTemperature(params.standardTemp, params.standardTempUnit, 'K');
+            
+            // Input validation
+            if (params.orificeDiameter >= params.pipeDiameter) {
+                throw new Error("Orifice diameter must be smaller than pipe diameter");
+            }
+            
+            if ([dpPa, params.orificeDiameter, params.pipeDiameter, params.gasDensity, gasTempK, gasPressurePa, params.standardDensity]
+                .some(x => x <= 0)) {
+                throw new Error("All input values must be positive");
+            }
+
+            // Calculate beta ratio
+            const beta = params.orificeDiameter / params.pipeDiameter;
+            
+            // Calculate orifice area
+            const area = Math.PI * Math.pow(params.orificeDiameter / 2, 2);
+            
+            // Calculate Reynolds number if needed
+            let reynolds = null;
+            if (params.viscosity && (params.dischargeCoeff === null || params.meterType !== 'orifice')) {
+                // Estimate velocity for Reynolds calculation
+                const prelimFlow = (0.61 * area / Math.sqrt(1 - Math.pow(beta, 4))) 
+                                 * Math.sqrt(2 * dpPa / params.gasDensity);
+                const velocity = prelimFlow / (Math.PI * Math.pow(params.pipeDiameter / 2, 2));
+                reynolds = (params.gasDensity * velocity * params.pipeDiameter) / params.viscosity;
+            }
+            
+            // Get discharge coefficient
+            const dischargeCoeff = params.dischargeCoeff !== null 
+                ? params.dischargeCoeff 
+                : calculateDischargeCoefficient(params.meterType, beta, reynolds);
+            
+            // Calculate expansion factor
+            const pressureRatio = dpPa / gasPressurePa;
+            const Y = calculateExpansionFactor(params.meterType, beta, pressureRatio, params.isentropicExp);
+            
+            // Calculate actual flow rate
+            const qActual = (dischargeCoeff * area * Y / Math.sqrt(1 - Math.pow(beta, 4))) 
+                           * Math.sqrt(2 * dpPa / params.gasDensity);
+            
+            // Convert to standard conditions using gas law
+            const qStandard = qActual * (gasPressurePa * standardTempK) / (101325 * gasTempK);
+            
+            // Calculate uncertainty (simplified)
+            const uncertainty = qStandard * 0.01; // 1% uncertainty as placeholder
+            
+            return {
+                flowRate: qStandard,
+                uncertainty: uncertainty,
+                dischargeCoeff: dischargeCoeff,
+                reynolds: reynolds,
+                betaRatio: beta
+            };
+        }
+
+        // Form submission handler
+        document.getElementById('flow-calculator-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Hide previous results/errors
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error-message').textContent = '';
+            
+            try {
+                // Get form values
+                const params = {
+                    meterType: document.getElementById('meter-type').value,
+                    dischargeCoeff: document.getElementById('discharge-coeff').value 
+                                   ? parseFloat(document.getElementById('discharge-coeff').value) 
+                                   : null,
+                    orificeDiameter: parseFloat(document.getElementById('orifice-diameter').value),
+                    pipeDiameter: parseFloat(document.getElementById('pipe-diameter').value),
+                    dp: parseFloat(document.getElementById('dp').value),
+                    dpUnit: document.getElementById('dp-unit').value,
+                    gasPressure: parseFloat(document.getElementById('gas-pressure').value),
+                    pressureUnit: document.getElementById('pressure-unit').value,
+                    gasDensity: parseFloat(document.getElementById('gas-density').value),
+                    gasTemp: parseFloat(document.getElementById('gas-temp').value),
+                    tempUnit: document.getElementById('temp-unit').value,
+                    viscosity: document.getElementById('viscosity').value 
+                              ? parseFloat(document.getElementById('viscosity').value) 
+                              : null,
+                    isentropicExp: document.getElementById('isentropic-exp').value 
+                                  ? parseFloat(document.getElementById('isentropic-exp').value) 
+                                  : 1.4,
+                    standardDensity: parseFloat(document.getElementById('standard-density').value),
+                    standardTemp: parseFloat(document.getElementById('standard-temp').value),
+                    standardTempUnit: document.getElementById('standard-temp-unit').value
+                };
+                
+                // Perform calculation
+                const result = calculateFlowRate(params);
+                
+                // Display results
+                const resultsDiv = document.getElementById('result-values');
+                resultsDiv.innerHTML = `
+                    <p><strong>Standard Flow Rate:</strong> ${result.flowRate.toExponential(4)} m³/s ± ${result.uncertainty.toExponential(4)}</p>
+                    <p><strong>Standard Flow Rate:</strong> ${(result.flowRate * 3600).toFixed(4)} m³/h ± ${(result.uncertainty * 3600).toFixed(4)}</p>
+                    <p><strong>Discharge Coefficient (C<sub>d</sub>):</strong> ${result.dischargeCoeff.toFixed(4)}</p>
+                    ${result.reynolds ? `<p><strong>Reynolds Number:</strong> ${result.reynolds.toExponential(4)}</p>` : ''}
+                    <p><strong>Beta Ratio (β):</strong> ${result.betaRatio.toFixed(4)}</p>
+                `;
+                
+                document.getElementById('results').style.display = 'block';
+            } catch (error) {
+                document.getElementById('error-message').textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>
