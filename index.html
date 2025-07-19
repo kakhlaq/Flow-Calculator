@@ -40,22 +40,23 @@
             box-sizing: border-box;
         }
         button {
-            background-color: #3498db;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #45a049;
         }
         .results {
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 30px;
+            padding: 20px;
             background-color: #e8f4fc;
             border-radius: 4px;
             display: none;
@@ -63,19 +64,35 @@
         .error {
             color: #e74c3c;
             margin-top: 10px;
+            padding: 10px;
+            background-color: #fdecea;
+            border-radius: 4px;
+            display: none;
         }
         .section-title {
             margin-top: 20px;
             padding-bottom: 5px;
             border-bottom: 1px solid #ddd;
             color: #2c3e50;
+            font-weight: bold;
         }
         .row {
             display: flex;
             gap: 15px;
+            margin-bottom: 15px;
         }
         .col {
             flex: 1;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -322,6 +339,14 @@
             }
         }
 
+        // Helper function to show error messages
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        }
+
         // Main calculation function
         function calculateFlowRate(params) {
             // Convert all inputs to SI units
@@ -391,8 +416,24 @@
             // Hide previous results/errors
             document.getElementById('results').style.display = 'none';
             document.getElementById('error-message').textContent = '';
+            document.getElementById('error-message').style.display = 'none';
             
             try {
+                // Validate required fields
+                const requiredFields = [
+                    'orifice-diameter', 'pipe-diameter', 'dp', 
+                    'gas-pressure', 'gas-density', 'gas-temp',
+                    'standard-density', 'standard-temp'
+                ];
+                
+                for (const fieldId of requiredFields) {
+                    const field = document.getElementById(fieldId);
+                    if (!field.value || isNaN(field.value)) {
+                        showError(`Please enter a valid number for ${fieldId.replace('-', ' ')}`);
+                        return;
+                    }
+                }
+
                 // Get form values
                 const params = {
                     meterType: document.getElementById('meter-type').value,
@@ -425,17 +466,20 @@
                 // Display results
                 const resultsDiv = document.getElementById('result-values');
                 resultsDiv.innerHTML = `
-                    <p><strong>Standard Flow Rate:</strong> ${result.flowRate.toExponential(4)} m³/s ± ${result.uncertainty.toExponential(4)}</p>
-                    <p><strong>Standard Flow Rate:</strong> ${(result.flowRate * 3600).toFixed(4)} m³/h ± ${(result.uncertainty * 3600).toFixed(4)}</p>
-                    <p><strong>Discharge Coefficient (C<sub>d</sub>):</strong> ${result.dischargeCoeff.toFixed(4)}</p>
-                    ${result.reynolds ? `<p><strong>Reynolds Number:</strong> ${result.reynolds.toExponential(4)}</p>` : ''}
-                    <p><strong>Beta Ratio (β):</strong> ${result.betaRatio.toFixed(4)}</p>
+                    <p><strong>Standard Flow Rate:</strong> <span class="result-value">${result.flowRate.toExponential(4)} m³/s</span> ± ${result.uncertainty.toExponential(4)}</p>
+                    <p><strong>Standard Flow Rate:</strong> <span class="result-value">${(result.flowRate * 3600).toFixed(4)} m³/h</span> ± ${(result.uncertainty * 3600).toFixed(4)}</p>
+                    <p><strong>Discharge Coefficient (C<sub>d</sub>):</strong> <span class="result-value">${result.dischargeCoeff.toFixed(4)}</span></p>
+                    ${result.reynolds ? `<p><strong>Reynolds Number:</strong> <span class="result-value">${result.reynolds.toExponential(4)}</span></p>` : ''}
+                    <p><strong>Beta Ratio (β):</strong> <span class="result-value">${result.betaRatio.toFixed(4)}</span></p>
                 `;
                 
                 document.getElementById('results').style.display = 'block';
             } catch (error) {
-                document.getElementById('error-message').textContent = error.message;
+                showError("Calculation error: " + error.message);
+                console.error(error);
             }
+            
+            return false;
         });
     </script>
 </body>
